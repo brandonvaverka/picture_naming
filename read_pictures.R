@@ -1,0 +1,7 @@
+library(tidyverse)  
+library(lubridate)
+library(exiftoolr)
+pics <- list.files("test_photos")
+x <- exiftoolr::exif_read(paste0("./test_photos/",pics))
+x$DateTimeOriginal <- ymd_hms(x$DateTimeOriginal)
+df <- data.frame(x$FileName,x$DateTimeOriginal)
