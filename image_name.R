@@ -1,10 +1,43 @@
-library(exif)
-library(jpeg)
+
+# Library Section ---------------------------------------------------------
+
 library(tidyverse)
-library(plyr)
 library(lubridate)
 library(exiftoolr)
-library(xts)
+#library(exif)
+#library(jpeg)
+#library(plyr)
+#library(xts)
+
+
+
+# Gather Picture Info -----------------------------------------------------
+
+#Create a variable with full path to all images
+all_pictures <- list.files("test_photos/",pattern = "*.JPG",full.names = TRUE)
+
+#Use exiftoolr to generate tibble containing picture path, name, and original creation date
+picture_info <- exif_read(path = all_pictures) %>% 
+  select(SourceFile,FileName,DateTimeOriginal) %>% 
+  as_tibble() %>% 
+  mutate(.,Date=as.POSIXct(DateTimeOriginal, format="%Y:%m:%d %H:%M:%S")) %>% 
+  select(-DateTimeOriginal)
+
+# Create a picture grouping constraint and group pictures for each location by buffer region.
+# Works by creating a buffer region of +- specified minutes ***Work in Progress***
+picture_groups <- picture_info %>% 
+  mutate(.,DateUpper={Date+minutes(5)} %>% 
+           floor_date(.,unit="minutes"),
+           DateLower={Date-minutes(5)} %>% 
+           floor_date(.,unit = "minutes")) %>%
+  group_by(.,DateUpper,DateLower) %>% 
+  summarise(.,n=n())
+
+
+  
+
+
+# Previous Attempts -------------------------------------------------------
 
 a <- readJPEG('Me_working')
 creation_date <- file.info('Me_working')$ctime
