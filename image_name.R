@@ -24,7 +24,7 @@ picture_info <- exif_read(path = all_pictures) %>%
   select(-DateTimeOriginal)
 
 # Create a picture grouping constraint and group pictures for each location by buffer region.
-# Works by creating a buffer region of +- specified minutes ***Work in Progress***
+# Works by creating a buffer region of +- specified minutes from the original Date ***Work in Progress***
 picture_groups <- picture_info %>% 
   mutate(.,DateUpper={Date+minutes(5)} %>% 
            floor_date(.,unit="minutes"),
