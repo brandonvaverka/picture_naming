@@ -11,6 +11,15 @@ library(exiftoolr)
 
 
 
+# Temporary read in of dataframe ------------------------------------------
+
+picture_info <- read.table("df_name_time",header = TRUE,sep = ",") %>% 
+  select(x.FileName,x.DateTimeOriginal) %>% 
+  as_tibble() %>% 
+  mutate(.,Date=as.POSIXct(x.DateTimeOriginal, format="%Y-%m-%d %H:%M:%S")) %>% 
+  select(-x.DateTimeOriginal)
+
+
 # Gather Picture Info -----------------------------------------------------
 
 #Create a variable with full path to all images
@@ -29,7 +38,9 @@ picture_groups <- picture_info %>%
   mutate(.,DateUpper={Date+minutes(5)} %>% 
            floor_date(.,unit="minutes"),
            DateLower={Date-minutes(5)} %>% 
-           floor_date(.,unit = "minutes")) %>%
+           floor_date(.,unit = "minutes"),
+           lagg_time= difftime(Date,lag(Date,default=Date[1]),units = "mins"),
+           groups=cumsum(ifelse(lagg_time>5,1,0)))# %>%
   group_by(.,DateUpper,DateLower) %>% 
   summarise(.,n=n())
 
