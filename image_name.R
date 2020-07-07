@@ -36,8 +36,11 @@ picture_info <- exif_read(path = all_pictures) %>%
 picture_groups <- picture_info %>% 
   mutate(.,lag_time = lag(Date,default=Date[1]) %>% 
                       difftime(Date,.,units = "mins"),
-           group_num = ifelse(lag_time>5,1,0) %>% 
+           group_num = ifelse(lag_time>15,1,0) %>% 
                     cumsum(.)) %>% 
   group_by(., group_num) %>% 
-  mutate(.,new_name =str_c("soil_pit_",group_num,"-",1:n(),".JPG")) %>% 
+  mutate(.,new_name =str_c("2020WY629",group_num+800,"-",1:n(),".JPG")) %>% 
   select(.,-lag_time)
+
+# Renaming the files with the new file names
+file.rename(picture_groups$FileName,picture_groups$new_name)
